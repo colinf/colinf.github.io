@@ -31839,9 +31839,7 @@ function newFilter(searchLetter) {
 }
 
 function selectPatient(patient) {
-  (0, _utilsThinkUtils.getEHR)(patient, function (ehrData) {
-    console.log('ehrData');
-    console.log(ehrData);
+  (0, _utilsThinkUtils.getEHR)(patient).then(function (ehrData) {
     _dispatcherAppDispatcher2['default'].dispatch({
       type: _constantsAppConstants.ActionTypes.PATIENT_SELECTED,
       patientId: patient.id,
@@ -33424,6 +33422,8 @@ exports.getEHR = getEHR;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
+
 var _constantsAppConstants = require('../constants/AppConstants');
 
 var _superagent = require('superagent');
@@ -33473,23 +33473,18 @@ function demographicsQuery(searchLetter, callback) {
   });
 }
 
-function getEHR(patient, callback) {
+function getEHR(patient) {
 
-  if (!_storesEhrStore2['default'].getEhrRecord()) {
-    (function () {
-      var ehrData = {};
-      var getAllergies = getEHRView(patient.ehrId, 'allergy');
-      var getMeds = getEHRView(patient.ehrId, 'medication');
-      Promise.all([getAllergies, getMeds]).then(function (results) {
-        results.forEach(function (result) {
-          Object.assign(ehrData, result);
-        });
-        callback(ehrData);
-      })['catch'](function (err) {});
-    })();
-  } else {
-    callback(null);
-  }
+  return Promise.resolve().then(function () {
+    if (_storesEhrStore2['default'].getEhrRecord(patient.id)) {
+      return null;
+    }
+    var getAllergies = getEHRView(patient.ehrId, 'allergy');
+    var getMeds = getEHRView(patient.ehrId, 'medication');
+    return Promise.all([getAllergies, getMeds]).then(function (results) {
+      return Object.assign.apply(Object, [{}].concat(_toConsumableArray(results)));
+    });
+  })['catch'](console.log.bind(console));
 }
 
 },{"../constants/AppConstants":291,"../stores/EhrStore":302,"../stores/SessionStore":305,"superagent":287}],308:[function(require,module,exports){
